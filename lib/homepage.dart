@@ -2,12 +2,18 @@ import 'dart:async';
 import 'barriers.dart';
 import 'package:flappybird_app/bird.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
+
+/*
+Für Restart: erkennen, wenn Vogel unterhalt der Grenze. Wenn das Eintritt, dann Vogel auf 0 Setzen.
+
+*/
 class _HomePageState extends State<HomePage> {
   static double birdYaxis = 0;
   double time = 0;
@@ -15,7 +21,14 @@ class _HomePageState extends State<HomePage> {
   double initialHeight = birdYaxis;
   bool gameHasStarted = false;
   static double barrierXone = 2;
-  double barrierXtwo = barrierXone + 1.5;
+  double barrierXtwo = barrierXone + 1.7; // hier wird der abstand zwischen den Barrieren bestimmt
+
+  int gapSizeForBird = 150;
+  int bufferForBarrierVisualization = 30;
+  int barrierOneHeightTop = 150;
+  int barrierOneHeightBottom = 250;
+  int barrierTwoHeightTop = 200;
+  int barrierTwoHeightBottom = 200;
 
   void jump() {
     setState(() {
@@ -35,12 +48,20 @@ class _HomePageState extends State<HomePage> {
 
       if(barrierXone < -2){//wenn Barriere links aus dem Bild raus, schiebe die Barriere auf die rechte Seite des Bildschirmes -> andernfalls mach einfach weiter
         barrierXone += 3.5;
+        int randomHeight = Random().nextInt(340);
+        barrierOneHeightTop = randomHeight + bufferForBarrierVisualization;
+        barrierOneHeightBottom = 550 - randomHeight - gapSizeForBird;
+        //550-150= 400 - 60(30 oben und 30 unten) = 340
       }else{
         barrierXone -= 0.05;
       }
 
       if(barrierXtwo < -2){//wenn Barriere links aus dem Bild raus, schiebe die Barriere auf die rechte Seite des Bildschirmes -> andernfalls mach einfach weiter
         barrierXtwo += 3.5;
+        int randomHeight = Random().nextInt(340);
+        barrierTwoHeightTop = randomHeight + bufferForBarrierVisualization;
+        barrierTwoHeightBottom = 550 - randomHeight - gapSizeForBird;
+
       }else{
         barrierXtwo -= 0.05;
       }
@@ -90,28 +111,28 @@ class _HomePageState extends State<HomePage> {
                     alignment: Alignment(barrierXone, -1.1),
                     duration: Duration(milliseconds: 0),
                     child: MyBarrier(
-                      size: 200.0,
+                      size: barrierOneHeightTop + 0.0,
                     )
                 ),
                 AnimatedContainer(
                     alignment: Alignment(barrierXone, 1.1),
                     duration: Duration(milliseconds: 0),
                     child: MyBarrier(
-                      size: 200.0,
-                    )
-                ),
-                AnimatedContainer(
-                    alignment: Alignment(barrierXtwo, 1.1),
-                    duration: Duration(milliseconds: 0),
-                    child: MyBarrier(
-                      size: 250.0,
+                      size: barrierOneHeightBottom + 0.0,
                     )
                 ),
                 AnimatedContainer(
                     alignment: Alignment(barrierXtwo, -1.1),
                     duration: Duration(milliseconds: 0),
                     child: MyBarrier(
-                      size: 150.0,
+                      size: barrierTwoHeightTop + 0.0,
+                    )
+                ),
+                AnimatedContainer(
+                    alignment: Alignment(barrierXtwo, 1.1),
+                    duration: Duration(milliseconds: 0),
+                    child: MyBarrier(
+                      size: barrierTwoHeightBottom + 0.0,
                     )
                 ),
               ],
