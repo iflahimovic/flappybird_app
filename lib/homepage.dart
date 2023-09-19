@@ -11,7 +11,7 @@ class HomePage extends StatefulWidget {
 
 
 /*
-Für Restart: erkennen, wenn Vogel unterhalt der Grenze. Wenn das Eintritt, dann Vogel auf 0 Setzen.
+Für Restart: erkennen, wenn Vogel unterhalb der Grenze. Wenn das Eintritt, dann Vogel auf 0 Setzen.
 
 */
 class _HomePageState extends State<HomePage> {
@@ -29,6 +29,12 @@ class _HomePageState extends State<HomePage> {
   int barrierOneHeightBottom = 250;
   int barrierTwoHeightTop = 200;
   int barrierTwoHeightBottom = 200;
+
+  int score = 0;
+  int highscore = 0;//theoretisch nh Datenbank dran hängen, um auch nach Spiel Beendigung wieder Highscore anzeigen zu können
+  bool barrierOneCounted = false;
+  bool barrierTwoCounted = false;
+
 
   void jump() {
     setState(() {
@@ -51,9 +57,20 @@ class _HomePageState extends State<HomePage> {
         int randomHeight = Random().nextInt(340);
         barrierOneHeightTop = randomHeight + bufferForBarrierVisualization;
         barrierOneHeightBottom = 550 - randomHeight - gapSizeForBird;
+
+        barrierOneCounted = false;//Barriere wurde versetzt und darf wieder gezählt werden
         //550-150= 400 - 60(30 oben und 30 unten) = 340
       }else{
         barrierXone -= 0.05;
+
+        //Barriere One ist am Vogel vorbei und muss hochgezählt werden
+        if((barrierXone < -0.3) & (barrierOneCounted == false)){
+          score += 1;
+          barrierOneCounted = true;
+
+          //neuer Highscore?
+          highscore = highscore < score ? score : highscore;
+        }
       }
 
       if(barrierXtwo < -2){//wenn Barriere links aus dem Bild raus, schiebe die Barriere auf die rechte Seite des Bildschirmes -> andernfalls mach einfach weiter
@@ -62,14 +79,32 @@ class _HomePageState extends State<HomePage> {
         barrierTwoHeightTop = randomHeight + bufferForBarrierVisualization;
         barrierTwoHeightBottom = 550 - randomHeight - gapSizeForBird;
 
+        barrierTwoCounted = false;//Barriere wurde versetzt und darf wieder gezählt werden
+
       }else{
         barrierXtwo -= 0.05;
+
+        //Barriere Two ist am Vogel vorbei und muss hochgezählt werden
+        if((barrierXtwo < -0.3) & (barrierTwoCounted == false)){
+          score += 1;
+          barrierTwoCounted = true;
+          //neuer Highscore?
+          highscore = highscore < score ? score : highscore;
+        }
       }
 
-      if (birdYaxis > 1) {
+
+
+      /* Funktionen, dass das Spiel beendet wird, wenn der Vogel oben oder unten aus dem Bild geht
+      if (birdYaxis > 1.2) {
         timer.cancel();
         gameHasStarted = false;
       }
+      if(birdYaxis < -1.2){
+        timer.cancel();
+        gameHasStarted = false;
+      }*/
+
     });
   }
 
@@ -153,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Text("Score", style: TextStyle(color: Colors.white, fontSize: 20),),
                       SizedBox(height: 20),
-                      Text("0", style: TextStyle(color: Colors.white, fontSize: 35)),
+                      Text(score.toString(), style: TextStyle(color: Colors.white, fontSize: 35)),
                     ],
                   ),
                   Column(
@@ -161,7 +196,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Text("Highscore", style: TextStyle(color: Colors.white, fontSize: 20)),
                       SizedBox(height: 20),
-                      Text("1", style: TextStyle(color: Colors.white, fontSize: 35)),
+                      Text(highscore.toString(), style: TextStyle(color: Colors.white, fontSize: 35)),
                     ],
                   )
                 ],
