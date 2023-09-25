@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool birdIsDead() {
-    return (birdY < -1 || birdY > 1);
+    return (birdY < -1.2 || birdY > 1.2);
   }
 
   void updateScore() {

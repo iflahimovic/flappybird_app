@@ -27,7 +27,7 @@ class BarrierData {
     lowerBarrierHeight = _lowerBarrierHeight;
   }
 
-  static int bufferForBarrierVisualization = 30;
+  static int bufferForBarrierVisualization = 60;
   static int gapSizeForBird = 150;
 
   late double x;
