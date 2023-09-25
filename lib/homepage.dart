@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage> {
   //theoretisch nh Datenbank dran hängen, um auch nach Spiel Beendigung wieder Highscore anzeigen zu können
   int highscore = 0;
 
+  bool gameShouldRestart = false;
+
   bool detectCollision(double birdY, int upperBarrierY, int lowerBarrierY) {
     return false;
   }
@@ -80,12 +82,21 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  restartGame(){
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
           if (gameIsRunning) {
-            jump();
+            if(gameShouldRestart)
+              {
+                jump();
+              }else { //if gameShouldRestart is true
+                restartGame();
+            }
           } else {
             startGame();
           }
@@ -146,39 +157,56 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: Container(
                   color: Colors.brown,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  child:
+                  Stack(
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          const Text(
-                            "Score",
-                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Score",
+                                style: TextStyle(color: Colors.white, fontSize: 20),
+                              ),
+                              const SizedBox(height: 20),
+                              Text(score.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 35)),
+                            ],
                           ),
-                          const SizedBox(height: 20),
-                          Text(score.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 35)),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text("Highscore",
+                                  style:
+                                      TextStyle(color: Colors.white, fontSize: 20)),
+                              const SizedBox(height: 20),
+                              Text(highscore.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 35)),
+                            ],
+                          ),
                         ],
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Highscore",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20)),
-                          const SizedBox(height: 20),
-                          Text(highscore.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 35)),
-                        ],
-                      )
+                      Container(
+                        child: ElevatedButton(
+                          onPressed: restartGame(),
+                          style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
+                          child:
+                          Text("Restart",
+                            style: TextStyle(
+                              color: Colors.white)
+                          ,)
+                        )
+                      ),
+
                     ],
-                  ),
-                ),
+                  )
+
               ),
-            ],
+              )],
           ),
         ));
   }
