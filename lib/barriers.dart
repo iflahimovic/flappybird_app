@@ -3,18 +3,42 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class MyBarrier extends StatelessWidget {
-  final height;
-  MyBarrier({this.height});
+  final upperPartHeight;
+  final lowerPartHeight;
+  MyBarrier({this.upperPartHeight, this.lowerPartHeight});
+
+  static double gapSizeForBird = 150;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      height: height,
-      decoration: BoxDecoration(
-          color: Colors.green,
-          border: Border.all(width: 10, color: Colors.black),
-          borderRadius: BorderRadius.circular(15)),
+    return Column(
+      children: [
+        Expanded(
+          flex: upperPartHeight,
+          child: Container(
+            width: 100,
+            decoration: BoxDecoration(
+                color: Colors.green,
+                border: Border.all(width: 10, color: Colors.black),
+                borderRadius: BorderRadius.circular(15)),
+          ),
+        ),
+        Container(
+          width: 100,
+          height: gapSizeForBird,
+          color: Colors.yellow,
+        ),
+        Expanded(
+          flex: lowerPartHeight,
+          child: Container(
+            width: 100,
+            decoration: BoxDecoration(
+                color: Colors.green,
+                border: Border.all(width: 10, color: Colors.black),
+                borderRadius: BorderRadius.circular(15)),
+          ),
+        )
+      ],
     );
   }
 }
@@ -27,9 +51,6 @@ class BarrierData {
     lowerBarrierHeight = _lowerBarrierHeight;
   }
 
-  static int bufferForBarrierVisualization = 60;
-  static int gapSizeForBird = 150;
-
   late double x;
   late int upperBarrierHeight;
   late int lowerBarrierHeight;
@@ -38,9 +59,9 @@ class BarrierData {
   void relocate() {
     //schiebe die Barriere auf die rechte Seite des Bildschirmes
     x += 3.5;
-    int randomHeight = Random().nextInt(340);
-    upperBarrierHeight = randomHeight + bufferForBarrierVisualization;
-    lowerBarrierHeight = 550 - randomHeight - gapSizeForBird;
+
+    upperBarrierHeight = Random().nextInt(100);
+    lowerBarrierHeight = 100 - lowerBarrierHeight;
 
     //Barriere wurde versetzt und darf wieder gezählt werden
     counted = false;

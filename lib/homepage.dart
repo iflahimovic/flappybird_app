@@ -22,8 +22,8 @@ class _HomePageState extends State<HomePage> {
   double initialBirdY = birdY;
 
   var barriers = <BarrierData>[
-    BarrierData(2, 150, 250),
-    BarrierData(2 + 1.7, 200, 200)
+    BarrierData(2, 55, 45),
+    BarrierData(2 + 1.7, 30, 70)
   ];
 
   int score = 0;
@@ -31,10 +31,6 @@ class _HomePageState extends State<HomePage> {
   int highscore = 0;
 
   bool gameShouldRestart = false;
-
-  bool detectCollision(double birdY, int upperBarrierY, int lowerBarrierY) {
-    return false;
-  }
 
   void jump() {
     setState(() {
@@ -44,7 +40,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool birdIsDead() {
-    return (birdY < -1.2 || birdY > 1.2);
+    bool birdHitCeiling = birdY > 1;
+    bool birdHitFloor = birdY < -1;
+    bool birdIsBetweenBarriers = barriers[0].x < -0.3 && barriers[0].x > 0;
+    // bool birdHitUpperBarrier = birdIsBetweenBarriers && birdY > barriers[0].upperBarrierHeight;
+    // bool birdHitLowerBarrier = false;
+    if (birdHitFloor || birdHitCeiling) {
+      return true;
+    }
+    return false;
   }
 
   void updateScore() {
@@ -82,20 +86,18 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  restartGame(){
-
-  }
+  restartGame() {}
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
           if (gameIsRunning) {
-            if(gameShouldRestart)
-              {
-                jump();
-              }else { //if gameShouldRestart is true
-                restartGame();
+            if (!gameShouldRestart) {
+              jump();
+            } else {
+              //if gameShouldRestart is true
+              restartGame();
             }
           } else {
             startGame();
@@ -125,28 +127,18 @@ class _HomePageState extends State<HomePage> {
                               ),
                       ),
                       AnimatedContainer(
-                          alignment: Alignment(barriers[0].x, -1.1),
+                          alignment: Alignment(barriers[0].x, 0),
                           duration: const Duration(milliseconds: 0),
                           child: MyBarrier(
-                            height: barriers[0].upperBarrierHeight + 0.0,
+                            upperPartHeight: barriers[0].upperBarrierHeight,
+                            lowerPartHeight: barriers[0].lowerBarrierHeight,
                           )),
                       AnimatedContainer(
-                          alignment: Alignment(barriers[0].x, 1.1),
+                          alignment: Alignment(barriers[1].x, 0),
                           duration: const Duration(milliseconds: 0),
                           child: MyBarrier(
-                            height: barriers[0].lowerBarrierHeight + 0.0,
-                          )),
-                      AnimatedContainer(
-                          alignment: Alignment(barriers[1].x, -1.1),
-                          duration: const Duration(milliseconds: 0),
-                          child: MyBarrier(
-                            height: barriers[1].upperBarrierHeight + 0.0,
-                          )),
-                      AnimatedContainer(
-                          alignment: Alignment(barriers[1].x, 1.1),
-                          duration: const Duration(milliseconds: 0),
-                          child: MyBarrier(
-                            height: barriers[1].lowerBarrierHeight + 0.0,
+                            upperPartHeight: barriers[1].upperBarrierHeight,
+                            lowerPartHeight: barriers[1].lowerBarrierHeight,
                           )),
                     ],
                   )),
@@ -156,57 +148,52 @@ class _HomePageState extends State<HomePage> {
               ),
               Expanded(
                 child: Container(
-                  color: Colors.brown,
-                  child:
-                  Stack(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                "Score",
-                                style: TextStyle(color: Colors.white, fontSize: 20),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(score.toString(),
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 35)),
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text("Highscore",
-                                  style:
-                                      TextStyle(color: Colors.white, fontSize: 20)),
-                              const SizedBox(height: 20),
-                              Text(highscore.toString(),
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 35)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Container(
-                        child: ElevatedButton(
+                    color: Colors.brown,
+                    child: Stack(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "Score",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                const SizedBox(height: 20),
+                                Text(score.toString(),
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 35)),
+                              ],
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text("Highscore",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 20)),
+                                const SizedBox(height: 20),
+                                Text(highscore.toString(),
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 35)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        ElevatedButton(
                           onPressed: restartGame(),
-                          style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
-                          child:
-                          Text("Restart",
-                            style: TextStyle(
-                              color: Colors.white)
-                          ,)
-                        )
-                      ),
-
-                    ],
-                  )
-
-              ),
-              )],
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.red)),
+                          child: const Text("Restart",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                    )),
+              )
+            ],
           ),
         ));
   }
