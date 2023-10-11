@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 import 'barriers.dart';
 import 'package:flappybird_app/bird.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 class HomePage extends StatefulWidget {
   @override
@@ -21,11 +21,16 @@ class _HomePageState extends State<HomePage> {
   double height = 0;
   double initialBirdY = birdY;
 
-  var barriers = <BarrierData>[
-    BarrierData(2, 55, 45),
-    BarrierData(2 + 1.7, 30, 70)
+  var barriers = <MyBarrier>[
+    MyBarrier(
+        key: GlobalKey(), x: 2, upperBarrierHeight: 30, lowerBarrierHeight: 40),
+    MyBarrier(
+        key: GlobalKey(),
+        x: 3.7,
+        upperBarrierHeight: 50,
+        lowerBarrierHeight: 20)
   ];
-
+  var bird = MyBird();
   int score = 0;
   //theoretisch nh Datenbank dran hängen, um auch nach Spiel Beendigung wieder Highscore anzeigen zu können
   int highscore = 0;
@@ -39,15 +44,59 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  bool barrierPassedBird(MyBarrier b) {
+    if ((b.x < -0.3) && (b.key.currentState?.counted == false)) {
+      b.key.currentState?.counted = true;
+      return true;
+    }
+    return false;
+  }
+
   bool birdIsDead() {
     bool birdHitCeiling = birdY > 1;
     bool birdHitFloor = birdY < -1;
-    bool birdIsBetweenBarriers = barriers[0].x < -0.3 && barriers[0].x > 0;
-    // bool birdHitUpperBarrier = birdIsBetweenBarriers && birdY > barriers[0].upperBarrierHeight;
-    // bool birdHitLowerBarrier = false;
     if (birdHitFloor || birdHitCeiling) {
       return true;
     }
+    //get left barrier
+    var barrier;
+    if (barriers[0].key.currentState!.x < barriers[1].key.currentState!.x) {
+      barrier = barriers[0];
+    } else {
+      barrier = barriers[1];
+    }
+
+    var gap = barrier.key.currentState!.gapKey;
+    RenderBox gapBox = gap.currentContext!.findRenderObject() as RenderBox;
+    Offset gapPosition = gapBox.localToGlobal(Offset.zero);
+
+    RenderBox birdBox =
+        bird.key.currentContext!.findRenderObject() as RenderBox;
+    Offset birdPosition = birdBox.localToGlobal(Offset.zero);
+
+    bool birdIsBetweenBarriers = (birdPosition.dx + 60 > gapPosition.dx &&
+        birdPosition.dx < gapPosition.dx + 100);
+    // if (birdIsBetweenBarriers) {
+    //   print("gap  bird  gap");
+    //   print(gapPosition.dx);
+    //   print(birdPosition.dx);
+    //   print(gapPosition.dx + 100);
+    // }
+    bool birdHitUpperBarrier =
+        (birdIsBetweenBarriers) && birdPosition.dy < gapPosition.dy;
+    if (birdHitUpperBarrier) {
+      print("upper");
+      print(birdPosition.dy);
+      print(gapPosition.dy);
+    }
+    bool birdHitLowerBarrier = (birdIsBetweenBarriers) &&
+        (birdPosition.dy + 60 > gapPosition.dy + 200);
+    if (birdHitLowerBarrier) {
+      print("lower");
+      print(birdPosition.dy + 60);
+      print(gapPosition.dy + 200);
+    }
+    if (birdHitUpperBarrier || birdHitLowerBarrier) return true;
     return false;
   }
 
@@ -59,8 +108,8 @@ class _HomePageState extends State<HomePage> {
   void startGame() {
     gameIsRunning = true;
 
-    final timer = Timer.periodic(Duration(milliseconds: 50), (timer) {
-      time += 0.04;
+    final timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+      time += 0.030;
       //formel für fallgeschwindigkeit
       height = -4.9 * time * time + 2.8 * time;
 
@@ -71,17 +120,19 @@ class _HomePageState extends State<HomePage> {
       if (birdIsDead()) {
         timer.cancel();
         gameIsRunning = false;
+        gameShouldRestart = true;
       }
 
       barriers.forEach((barrier) {
-        if (barrier.x < -2) {
-          barrier.relocate();
+        if (barrier.key.currentState!.x < -2) {
+          barrier.key.currentState?.relocate();
         } else {
-          barrier.move();
-          if (barrier.passedBird()) {
+          barrier.key.currentState?.move();
+          if (barrierPassedBird(barrier)) {
             updateScore();
           }
         }
+        barrier.key.currentState!.setState(() {});
       });
     });
   }
@@ -97,7 +148,7 @@ class _HomePageState extends State<HomePage> {
               jump();
             } else {
               //if gameShouldRestart is true
-              restartGame();
+              //restartGame();
             }
           } else {
             startGame();
@@ -114,7 +165,7 @@ class _HomePageState extends State<HomePage> {
                         alignment: Alignment(0, birdY),
                         duration: const Duration(milliseconds: 0),
                         color: Colors.blue,
-                        child: MyBird(),
+                        child: bird,
                       ),
                       Container(
                         alignment: const Alignment(0, -0.3),
@@ -126,20 +177,8 @@ class _HomePageState extends State<HomePage> {
                                     fontSize: 20, color: Colors.white),
                               ),
                       ),
-                      AnimatedContainer(
-                          alignment: Alignment(barriers[0].x, 0),
-                          duration: const Duration(milliseconds: 0),
-                          child: MyBarrier(
-                            upperPartHeight: barriers[0].upperBarrierHeight,
-                            lowerPartHeight: barriers[0].lowerBarrierHeight,
-                          )),
-                      AnimatedContainer(
-                          alignment: Alignment(barriers[1].x, 0),
-                          duration: const Duration(milliseconds: 0),
-                          child: MyBarrier(
-                            upperPartHeight: barriers[1].upperBarrierHeight,
-                            lowerPartHeight: barriers[1].lowerBarrierHeight,
-                          )),
+                      barriers[0],
+                      barriers[1],
                     ],
                   )),
               Container(
