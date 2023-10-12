@@ -2,8 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class MyBarrier extends StatefulWidget {
-  @override
   GlobalKey<MyBarrierState> key = GlobalKey();
+  //override getter for key property
+  GlobalKey get getKey => key;
 
   MyBarrier(
       {required this.key,
@@ -67,9 +68,9 @@ class MyBarrierState extends State<MyBarrier> {
             key: gapKey,
             width: 100,
             height: 200,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 color: Colors.transparent,
-                border: const Border(
+                border: Border(
                   top: BorderSide(color: Colors.black, width: 10),
                   bottom: BorderSide(color: Colors.black, width: 10),
                 )),
