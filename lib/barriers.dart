@@ -38,7 +38,7 @@ class MyBarrierState extends State<MyBarrier> {
     lowerBarrierHeight = 100 - upperBarrierHeight;
     x += 3.5;
     //Barriere wurde versetzt und darf wieder gezählt werden
-    counted = true;
+    counted = false;
   }
 
   void move() {

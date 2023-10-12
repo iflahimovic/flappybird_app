@@ -15,13 +15,12 @@ Für Restart: erkennen, wenn Vogel unterhalb der Grenze. Wenn das Eintritt, dann
 */
 class _HomePageState extends State<HomePage> {
   resetGame() {
-    // re-initialize the HomePage Widget
+    // the app needs to restart
     setState(() {
-      gameIsRunning = false;
       birdY = 0;
+      initialBirdY = 0;
       time = 0;
       height = 0;
-      initialBirdY = birdY;
       barriers = <MyBarrier>[
         MyBarrier(
             key: GlobalKey(),
@@ -34,11 +33,11 @@ class _HomePageState extends State<HomePage> {
             upperBarrierHeight: Random().nextInt(100),
             lowerBarrierHeight: 100 - Random().nextInt(100))
       ];
-      bird = MyBird();
       score = 0;
     });
   }
 
+  double birdAngle = 0;
   bool gameIsRunning = false;
   double birdY = 0;
   double initialBirdY = 0;
@@ -67,16 +66,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  bool barrierPassedBird(MyBarrier b) {
-    print(b.toString());
-    if ((b.key.currentState!.x < -0.3) &&
-        (b.key.currentState!.counted == false)) {
-      b.key.currentState?.counted = true;
-      return true;
-    }
-    return false;
-  }
-
   bool birdIsDead() {
     //check if bird hit ceiling or floor
     bool birdHitCeiling = birdY > 1;
@@ -99,16 +88,21 @@ class _HomePageState extends State<HomePage> {
     RenderBox birdBox =
         bird.key.currentContext!.findRenderObject() as RenderBox;
     Offset birdPosition = birdBox.localToGlobal(Offset.zero);
-
     //check if bird is between barriers
     bool birdIsBetweenBarriers = (gapPosition.dx < birdPosition.dx + 60 &&
         gapPosition.dx + 100 > birdPosition.dx);
     //check if bird hit upper or lower barrier
     if (birdIsBetweenBarriers) {
+      // update score if bird passed barrier
+      if (!barrier.counted) {
+        barrier.counted = true;
+        updateScore();
+      }
       bool birdHitUpperBarrier = birdPosition.dy < gapPosition.dy;
       bool birdHitLowerBarrier = (birdPosition.dy + 45 > gapPosition.dy + 200);
       return (birdHitUpperBarrier || birdHitLowerBarrier);
     }
+
     return false;
   }
 
@@ -118,6 +112,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void startGame() {
+    resetGame();
     gameIsRunning = true;
 
     final timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
@@ -139,9 +134,6 @@ class _HomePageState extends State<HomePage> {
           barrier.key.currentState?.relocate();
         } else {
           barrier.key.currentState?.move();
-          if (barrierPassedBird(barrier)) {
-            updateScore();
-          }
         }
         barrier.key.currentState!.setState(() {});
       }
@@ -169,7 +161,10 @@ class _HomePageState extends State<HomePage> {
                         alignment: Alignment(0, birdY),
                         duration: const Duration(milliseconds: 0),
                         color: Colors.blue,
-                        child: bird,
+                        child: Transform.rotate(
+                          angle: birdAngle,
+                          child: bird,
+                        ),
                       ),
                       Container(
                         alignment: const Alignment(0, -0.3),
