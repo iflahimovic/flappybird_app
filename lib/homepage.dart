@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 import 'barriers.dart';
 import 'package:flappybird_app/bird.dart';
 import 'package:flutter/material.dart';
@@ -166,6 +167,8 @@ class _HomePageState extends State<HomePage> {
                           child: bird,
                         ),
                       ),
+                      barriers[0],
+                      barriers[1],
                       Container(
                         alignment: const Alignment(0, -0.3),
                         child: gameIsRunning
@@ -176,8 +179,6 @@ class _HomePageState extends State<HomePage> {
                                     fontSize: 20, color: Colors.white),
                               ),
                       ),
-                      barriers[0],
-                      barriers[1],
                     ],
                   )),
               Container(
